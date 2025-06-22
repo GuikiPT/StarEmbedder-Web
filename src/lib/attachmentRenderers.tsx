@@ -5,7 +5,10 @@ import {
   DiscordAudioAttachment,
   DiscordVideoAttachment,
 } from "@skyra/discord-components-react";
-import type { DiscordMessage } from "@/lib/discord-api";
+import type {
+  DiscordMessage,
+  DiscordStickerFormatType,
+} from "@/lib/discord-api";
 import { getLargerDiscordImageUrl } from "@/lib/utils";
 
 /**
@@ -64,6 +67,48 @@ export function renderAttachments(attachments: DiscordMessage["attachments"]) {
             />
           );
         }
+      })}
+    </DiscordAttachments>
+  );
+}
+
+/**
+ * Get the URL for a Discord sticker
+ */
+function getStickerUrl(
+  stickerId: string,
+  formatType: DiscordStickerFormatType
+): string {
+  const extension = formatType === 3 ? "json" : "png"; // Lottie stickers use json, others use png
+  return `https://media.discordapp.net/stickers/${stickerId}.${extension}`;
+}
+
+/**
+ * Render Discord message stickers as image attachments
+ */
+export function renderStickers(stickers: DiscordMessage["sticker_items"]) {
+  if (!stickers || stickers.length === 0) return null;
+
+  return (
+    <DiscordAttachments slot="attachments">
+      {stickers.map((sticker) => {
+        // Only render as images for PNG, APNG, and GIF formats
+        // Lottie stickers (format_type 3) would need special handling
+        if (sticker.format_type === 3) {
+          // For Lottie stickers, we could potentially render them differently
+          // For now, we'll skip them or render as a placeholder
+          return null;
+        }
+
+        const stickerUrl = getStickerUrl(sticker.id, sticker.format_type);
+
+        return (
+          <DiscordImageAttachment
+            key={sticker.id}
+            url={stickerUrl}
+            alt={sticker.name}
+          />
+        );
       })}
     </DiscordAttachments>
   );

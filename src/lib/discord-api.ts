@@ -50,6 +50,38 @@ export interface DiscordAttachment {
   width?: number;
 }
 
+export enum DiscordStickerType {
+  STANDARD = 1,
+  GUILD = 2,
+}
+
+export enum DiscordStickerFormatType {
+  PNG = 1,
+  APNG = 2,
+  LOTTIE = 3,
+  GIF = 4,
+}
+
+export interface DiscordSticker {
+  id: string;
+  pack_id?: string;
+  name: string;
+  description?: string;
+  tags: string;
+  type: DiscordStickerType;
+  format_type: DiscordStickerFormatType;
+  available?: boolean;
+  guild_id?: string;
+  user?: DiscordUser;
+  sort_value?: number;
+}
+
+export interface DiscordStickerItem {
+  id: string;
+  name: string;
+  format_type: DiscordStickerFormatType;
+}
+
 export interface DiscordEmbed {
   title?: string;
   type?: string;
@@ -129,6 +161,7 @@ export interface DiscordMessage {
   referenced_message?: DiscordMessage;
   message_snapshots?: DiscordMessageSnapshot[];
   member?: DiscordMember;
+  sticker_items?: DiscordStickerItem[];
 }
 
 export interface DiscordChannel {
@@ -151,26 +184,26 @@ export interface DiscordGuild {
   features: string[];
 }
 
-const DISCORD_API_BASE = 'https://discord.com/api/v10';
+const DISCORD_API_BASE = "https://discord.com/api/v10";
 
 class DiscordAPIError extends Error {
   constructor(message: string, public status?: number) {
     super(message);
-    this.name = 'DiscordAPIError';
+    this.name = "DiscordAPIError";
   }
 }
 
 async function makeDiscordRequest(endpoint: string) {
   const token = process.env.DISCORD_BOT_TOKEN;
-  
+
   if (!token) {
-    throw new DiscordAPIError('Discord bot token is not configured');
+    throw new DiscordAPIError("Discord bot token is not configured");
   }
 
   const response = await fetch(`${DISCORD_API_BASE}${endpoint}`, {
     headers: {
-      'Authorization': `Bot ${token}`,
-      'Content-Type': 'application/json',
+      Authorization: `Bot ${token}`,
+      "Content-Type": "application/json",
     },
   });
 
@@ -191,7 +224,9 @@ export async function getDiscordMessage(
   return makeDiscordRequest(`/channels/${channelId}/messages/${messageId}`);
 }
 
-export async function getDiscordChannel(channelId: string): Promise<DiscordChannel> {
+export async function getDiscordChannel(
+  channelId: string
+): Promise<DiscordChannel> {
   return makeDiscordRequest(`/channels/${channelId}`);
 }
 
@@ -199,11 +234,17 @@ export async function getDiscordGuild(guildId: string): Promise<DiscordGuild> {
   return makeDiscordRequest(`/guilds/${guildId}`);
 }
 
-export async function getGuildMember(guildId: string, userId: string): Promise<DiscordMember> {
+export async function getGuildMember(
+  guildId: string,
+  userId: string
+): Promise<DiscordMember> {
   return makeDiscordRequest(`/guilds/${guildId}/members/${userId}`);
 }
 
-export async function getGuildMembers(guildId: string, limit: number = 100): Promise<DiscordMember[]> {
+export async function getGuildMembers(
+  guildId: string,
+  limit: number = 100
+): Promise<DiscordMember[]> {
   return makeDiscordRequest(`/guilds/${guildId}/members?limit=${limit}`);
 }
 
@@ -211,23 +252,38 @@ export async function getGuildRoles(guildId: string): Promise<DiscordRole[]> {
   return makeDiscordRequest(`/guilds/${guildId}/roles`);
 }
 
-export async function getGuildChannels(guildId: string): Promise<DiscordChannel[]> {
+export async function getGuildChannels(
+  guildId: string
+): Promise<DiscordChannel[]> {
   return makeDiscordRequest(`/guilds/${guildId}/channels`);
 }
 
-export function getDiscordAvatarUrl(user: DiscordUser, size: number = 256): string {
+export function getDiscordAvatarUrl(
+  user: DiscordUser,
+  size: number = 256
+): string {
   if (user.avatar) {
-    return `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.${user.avatar.startsWith('a_') ? 'gif' : 'png'}?size=${size}`;
+    return `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.${
+      user.avatar.startsWith("a_") ? "gif" : "png"
+    }?size=${size}`;
   }
   // Default avatar
   const defaultAvatarNumber = parseInt(user.discriminator) % 5;
   return `https://cdn.discordapp.com/embed/avatars/${defaultAvatarNumber}.png`;
 }
 
-export function getGuildMemberAvatarUrl(member: DiscordMember, guildId: string, size: number = 256): string {
+export function getGuildMemberAvatarUrl(
+  member: DiscordMember,
+  guildId: string,
+  size: number = 256
+): string {
   // If the member has a guild-specific avatar, use that
   if (member.avatar) {
-    return `https://cdn.discordapp.com/guilds/${guildId}/users/${member.user.id}/avatars/${member.avatar}.${member.avatar.startsWith('a_') ? 'gif' : 'png'}?size=${size}`;
+    return `https://cdn.discordapp.com/guilds/${guildId}/users/${
+      member.user.id
+    }/avatars/${member.avatar}.${
+      member.avatar.startsWith("a_") ? "gif" : "png"
+    }?size=${size}`;
   }
   // Fall back to the user's global avatar
   return getDiscordAvatarUrl(member.user, size);
@@ -236,16 +292,19 @@ export function getGuildMemberAvatarUrl(member: DiscordMember, guildId: string, 
 /**
  * Get the highest role color for a member
  */
-export function getHighestRoleColor(member: DiscordMember, roles: DiscordRole[]): string | null {
+export function getHighestRoleColor(
+  member: DiscordMember,
+  roles: DiscordRole[]
+): string | null {
   if (!member.roles || member.roles.length === 0) return null;
-  
+
   // Filter member's roles and find the one with the highest position and a color
   const memberRoles = roles
-    .filter(role => member.roles.includes(role.id) && role.color !== 0)
+    .filter((role) => member.roles.includes(role.id) && role.color !== 0)
     .sort((a, b) => b.position - a.position); // Sort by position (highest first)
-  
+
   if (memberRoles.length === 0) return null;
-  
+
   const highestRole = memberRoles[0];
-  return `#${highestRole.color.toString(16).padStart(6, '0')}`;
+  return `#${highestRole.color.toString(16).padStart(6, "0")}`;
 }

@@ -27,7 +27,7 @@ import {
 import { MarkdownRenderer } from "@/components/MarkdownRenderer";
 import { isValidDiscordId, isForwardedMessage } from "@/lib/utils";
 import { renderEmbeds } from "@/lib/messageRenderers";
-import { renderAttachments } from "@/lib/attachmentRenderers";
+import { renderAttachments, renderStickers } from "@/lib/attachmentRenderers";
 
 interface PageProps {
   params: Promise<{
@@ -202,6 +202,7 @@ function renderFullReplyMessage(
 
         {/* Reply Message Attachments */}
         {renderAttachments(replyMessage.attachments)}
+        {renderStickers(replyMessage.sticker_items)}
       </DiscordMessageComponent>
     </DiscordMessages>
   );
@@ -259,6 +260,9 @@ function renderForwardedMessage(
       {/* Forwarded Message Attachments */}
       {snapshot.attachments && snapshot.attachments.length > 0 && (
         <div className="mt-2">{renderAttachments(snapshot.attachments)}</div>
+      )}
+      {snapshot.sticker_items && snapshot.sticker_items.length > 0 && (
+        <div className="mt-2">{renderStickers(snapshot.sticker_items)}</div>
       )}
     </div>
   );
@@ -383,6 +387,9 @@ export default async function DiscordMessagePage({ params }: PageProps) {
 
           {/* Attachments */}
           {renderAttachments(message.attachments)}
+
+          {/* Stickers */}
+          {renderStickers(message.sticker_items)}
         </DiscordMessageComponent>
       </DiscordMessages>
     </div>
