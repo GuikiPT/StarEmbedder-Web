@@ -167,7 +167,7 @@ function renderFullReplyMessage(
     : null;
 
   return (
-    <DiscordMessages className="ml-4 mb-4 mt-4 mr-4 opacity-80" suppressHydrationWarning={true}>
+    <DiscordMessages className="ml-4" suppressHydrationWarning={true}>
       <DiscordMessageComponent
         author={replyAuthorName}
         avatar={replyAvatarUrl}
