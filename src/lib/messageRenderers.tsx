@@ -8,6 +8,7 @@ import {
 import { parseMarkdown, type MentionContext } from "@/lib/markdown";
 import type { DiscordMessage } from "@/lib/discord-api";
 import { getLargerDiscordImageUrl, isImageUrl } from "@/lib/utils";
+import { ClientOnlyEmbedFields } from "@/components/ClientOnlyEmbedFields";
 import React from "react";
 
 /**
@@ -163,6 +164,7 @@ export function renderEmbeds(
                 authorUrl={embed.author?.url}
                 authorImage={getLargerDiscordImageUrl(embed.author?.icon_url)}
                 image={getLargerDiscordImageUrl(previewUrl)}
+                suppressHydrationWarning={true}
               >
                 {embed.description && (
                   <DiscordEmbedDescription slot="description">
@@ -207,6 +209,7 @@ export function renderEmbeds(
           thumbnail={getLargerDiscordImageUrl(
             embed.thumbnail?.proxy_url || embed.thumbnail?.url
           )}
+          suppressHydrationWarning={true}
         >
           {embed.description && (
             <DiscordEmbedDescription slot="description">
@@ -219,33 +222,10 @@ export function renderEmbeds(
           )}
 
           {embed.fields && embed.fields.length > 0 && (
-            <DiscordEmbedFields slot="fields">
-              {embed.fields.map((field, fieldIndex) => {
-                // Calculate inline-index for consecutive inline fields
-                let inlineIndex = undefined;
-                if (field.inline) {
-                  const inlineFieldsBefore = embed
-                    .fields!.slice(0, fieldIndex)
-                    .filter((f) => f.inline);
-                  inlineIndex = inlineFieldsBefore.length + 1;
-                }
-
-                return (
-                  <DiscordEmbedField
-                    key={fieldIndex}
-                    fieldTitle={field.name}
-                    inline={field.inline ? true : undefined}
-                    inline-index={inlineIndex?.toString()}
-                  >
-                    <div
-                      dangerouslySetInnerHTML={{
-                        __html: parseMarkdown(field.value, mentionContext),
-                      }}
-                    />
-                  </DiscordEmbedField>
-                );
-              })}
-            </DiscordEmbedFields>
+            <ClientOnlyEmbedFields
+              fields={embed.fields}
+              mentionContext={mentionContext}
+            />
           )}
 
           {embed.footer && (

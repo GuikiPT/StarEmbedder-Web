@@ -18,7 +18,7 @@ export function renderAttachments(attachments: DiscordMessage["attachments"]) {
   if (!attachments || attachments.length === 0) return null;
 
   return (
-    <DiscordAttachments slot="attachments">
+    <DiscordAttachments slot="attachments" suppressHydrationWarning={true}>
       {attachments.map((attachment) => {
         const isImage = attachment.content_type?.startsWith("image/");
         const isAudio = attachment.content_type?.startsWith("audio/");
@@ -38,6 +38,7 @@ export function renderAttachments(attachments: DiscordMessage["attachments"]) {
               key={attachment.id}
               url={finalUrl!}
               alt={attachment.filename}
+              suppressHydrationWarning={true}
             />
           );
         } else if (isAudio) {
@@ -47,6 +48,7 @@ export function renderAttachments(attachments: DiscordMessage["attachments"]) {
               name={attachment.filename}
               href={attachment.proxy_url || attachment.url}
               bytes={attachment.size}
+              suppressHydrationWarning={true}
             />
           );
         } else if (isVideo) {
@@ -54,6 +56,7 @@ export function renderAttachments(attachments: DiscordMessage["attachments"]) {
             <DiscordVideoAttachment
               key={attachment.id}
               href={attachment.proxy_url || attachment.url}
+              suppressHydrationWarning={true}
             />
           );
         } else {
@@ -64,6 +67,7 @@ export function renderAttachments(attachments: DiscordMessage["attachments"]) {
               bytes={attachment.size}
               href={attachment.proxy_url || attachment.url}
               type={attachment.content_type}
+              suppressHydrationWarning={true}
             />
           );
         }
@@ -90,7 +94,7 @@ export function renderStickers(stickers: DiscordMessage["sticker_items"]) {
   if (!stickers || stickers.length === 0) return null;
 
   return (
-    <DiscordAttachments slot="attachments">
+    <DiscordAttachments slot="attachments" suppressHydrationWarning={true}>
       {stickers.map((sticker) => {
         // Only render as images for PNG, APNG, and GIF formats
         // Lottie stickers (format_type 3) would need special handling
@@ -107,6 +111,7 @@ export function renderStickers(stickers: DiscordMessage["sticker_items"]) {
             key={sticker.id}
             url={stickerUrl}
             alt={sticker.name}
+            suppressHydrationWarning={true}
           />
         );
       })}

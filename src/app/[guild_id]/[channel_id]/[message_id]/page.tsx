@@ -167,13 +167,14 @@ function renderFullReplyMessage(
     : null;
 
   return (
-    <DiscordMessages className="ml-4 mb-4 mt-4 mr-4 opacity-80">
+    <DiscordMessages className="ml-4 mb-4 mt-4 mr-4 opacity-80" suppressHydrationWarning={true}>
       <DiscordMessageComponent
         author={replyAuthorName}
         avatar={replyAvatarUrl}
         roleColor={replyAuthorRoleColor || undefined}
         timestamp={formatDiscordTimestamp(replyMessage.timestamp)}
         edited={!!replyMessage.edited_timestamp}
+        suppressHydrationWarning={true}
       >
         {/* Forwarded Messages (Snapshots) in Reply */}
         {isForwardedMessage(replyMessage) && replyMessage.message_snapshots && (
@@ -310,7 +311,7 @@ export default async function DiscordMessagePage({ params }: PageProps) {
 
   return (
     <div
-      className="p-4 max-w-3xl rounded-lg shadow-lg"
+      className="p-4 max-w-3xl"
       style={{ backgroundColor: "#36393e" }}
       id="discord-message-container"
     >
@@ -321,13 +322,14 @@ export default async function DiscordMessagePage({ params }: PageProps) {
         </div>
       )}
 
-      <DiscordMessages className="pl-4">
+      <DiscordMessages className="pl-4" suppressHydrationWarning={true}>
         <DiscordMessageComponent
           author={authorName}
           avatar={avatarUrl}
           roleColor={authorRoleColor || undefined}
           timestamp={formatDiscordTimestamp(message.timestamp)}
           edited={!!message.edited_timestamp}
+          suppressHydrationWarning={true}
         >
           {/* Standard Discord Reply indicator for consistency */}
           {message.referenced_message && (
@@ -342,6 +344,7 @@ export default async function DiscordMessagePage({ params }: PageProps) {
                 512
               )}
               style={{ left: "55px" }}
+              suppressHydrationWarning={true}
             >
               {renderReplyContent(
                 message.referenced_message.content,
