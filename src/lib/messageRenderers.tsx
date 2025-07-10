@@ -1,8 +1,6 @@
 import {
   DiscordEmbed,
   DiscordEmbedDescription,
-  DiscordEmbedField,
-  DiscordEmbedFields,
   DiscordEmbedFooter,
 } from "@skyra/discord-components-react";
 import { parseMarkdown, type MentionContext } from "@/lib/markdown";
